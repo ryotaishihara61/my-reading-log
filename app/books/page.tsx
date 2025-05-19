@@ -12,8 +12,10 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type BookRow = [string, string, string, string, string, string, string];
+
 export default function BookList() {
-  const [books, setBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<BookRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState(0);
   const [monthFilter, setMonthFilter] = useState("");
