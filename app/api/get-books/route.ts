@@ -24,7 +24,7 @@ export async function GET() {
 
     return NextResponse.json({ data: rows }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ 読み込みエラー:", JSON.stringify(error, null, 2));
     return NextResponse.json(
       { error: "読み込みに失敗しました" },
