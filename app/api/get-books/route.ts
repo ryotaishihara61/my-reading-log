@@ -13,7 +13,7 @@ export async function GET() {
     const sheets = google.sheets({ version: "v4", auth });
 
     const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID!;
-    const range = "A2:G"; // A2以降（1行目はヘッダー）
+    const range = "A2:G"; // 2行目以降を取得
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -24,8 +24,11 @@ export async function GET() {
 
     return NextResponse.json({ data: rows }, { status: 200 });
 
-  } catch (error) {
-    console.error("読み込みエラー:", error);
-    return NextResponse.json({ error: "読み込みに失敗しました" }, { status: 500 });
+  } catch (error: any) {
+    console.error("❌ 読み込みエラー:", JSON.stringify(error, null, 2));
+    return NextResponse.json(
+      { error: "読み込みに失敗しました" },
+      { status: 500 }
+    );
   }
 }
