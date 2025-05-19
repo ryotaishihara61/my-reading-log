@@ -35,6 +35,7 @@ export default function Home() {
         setMessage("書籍が見つかりませんでした。");
       }
     } catch (_err) {
+      console.error(_err);
       setMessage("検索に失敗しました。");
     }
   };
@@ -66,6 +67,7 @@ export default function Home() {
       setMemo("");
       setRating(3);
     } catch (_err) {
+      console.error(_err);
       setMessage("保存に失敗しました。");
     }
   };
