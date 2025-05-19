@@ -1,9 +1,0 @@
-{
-  "functions": {
-    "api/**.ts": {
-      "env": {
-        "NODE_OPTIONS": "--openssl-legacy-provider"
-      }
-    }
-  }
-}
