@@ -34,7 +34,7 @@ export default function Home() {
         setBookInfo(null);
         setMessage("書籍が見つかりませんでした。");
       }
-    } catch (err) {
+    } catch (_err) {
       setMessage("検索に失敗しました。");
     }
   };
@@ -65,7 +65,7 @@ export default function Home() {
       setBookInfo(null);
       setMemo("");
       setRating(3);
-    } catch (err) {
+    } catch (_err) {
       setMessage("保存に失敗しました。");
     }
   };
