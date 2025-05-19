@@ -20,20 +20,32 @@ export default function BookList() {
   const [ratingFilter, setRatingFilter] = useState(0);
   const [monthFilter, setMonthFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasError, setHasError] = useState(false);
   const booksPerPage = 10;
 
   useEffect(() => {
     const fetchBooks = async () => {
-      const res = await fetch("/api/get-books");
-      const json = await res.json();
-      setBooks(json.data);
+      try {
+        const res = await fetch("/api/get-books");
+        const json = await res.json();
+        if (json.data) {
+          setBooks(json.data);
+        } else {
+          setHasError(true);
+        }
+      } catch (_err) {
+        console.error("API fetch error:", _err);
+        setHasError(true);
+      }
     };
     fetchBooks();
   }, []);
 
-  const uniqueMonths = Array.from(new Set(books.map((b) => b[3]?.slice(0, 7)))).sort();
+  const uniqueMonths = Array.from(
+    new Set((books || []).map((b) => b[3]?.slice(0, 7)))
+  ).sort();
 
-  const filteredBooks = books.filter((book) => {
+  const filteredBooks = (books || []).filter((book) => {
     const keyword = searchQuery.toLowerCase();
     const matchesKeyword =
       book[1]?.toLowerCase().includes(keyword) ||
@@ -48,9 +60,8 @@ export default function BookList() {
   const paginatedBooks = filteredBooks.slice(startIndex, endIndex);
 
   const countByMonth: { [key: string]: number } = {};
-  books.forEach((row) => {
-    const date = row[3];
-    const month = date?.slice(0, 7);
+  (books || []).forEach((row) => {
+    const month = row[3]?.slice(0, 7);
     if (month) {
       countByMonth[month] = (countByMonth[month] || 0) + 1;
     }
@@ -67,6 +78,10 @@ export default function BookList() {
       <Link href="/" className="text-blue-500 underline text-sm mb-6 inline-block">
         → 本を新しく記録する
       </Link>
+
+      {hasError && (
+        <p className="text-red-600 mb-4">⚠️ データの読み込みに失敗しました。もう一度お試しください。</p>
+      )}
 
       {/* フィルター */}
       <div className="flex flex-col md:flex-row flex-wrap gap-4 mb-6">
@@ -95,7 +110,6 @@ export default function BookList() {
           <option value={2}>★2以上</option>
           <option value={1}>★1以上</option>
         </select>
-
         <select
           value={monthFilter}
           onChange={(e) => {
@@ -115,15 +129,14 @@ export default function BookList() {
 
       {/* 一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {paginatedBooks.map((book, i) => {
-            const rawImage = book[6];
-
-            const imageUrl = (() => {
+        {(paginatedBooks || []).map((book, i) => {
+          const rawImage = book[6];
+          const imageUrl = (() => {
             if (!rawImage || rawImage.trim() === "") return "/no-image.png";
             if (rawImage.includes("no-image")) return "/no-image.png";
             if (rawImage.startsWith("http")) return rawImage;
             return "/" + rawImage;
-            })();
+          })();
 
           return (
             <div key={i} className="border p-4 rounded shadow-sm bg-white">
@@ -145,9 +158,7 @@ export default function BookList() {
             key={i}
             onClick={() => setCurrentPage(i + 1)}
             className={`px-3 py-1 rounded ${
-              currentPage === i + 1
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-800"
+              currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
             }`}
           >
             {i + 1}
