@@ -3,46 +3,33 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    console.log("📥 /api/get-books: 開始");
-
-    const serviceEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
-
-    if (!serviceEmail || !privateKey || !spreadsheetId) {
-      console.error("❌ 環境変数が不足しています");
-      return NextResponse.json(
-        { error: "Missing environment variables" },
-        { status: 500 }
-      );
-    }
+    // ✅ 環境変数のログ出力（Vercelのログに表示されます）
+    console.log("GOOGLE_SERVICE_ACCOUNT_EMAIL:", process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
+    console.log("GOOGLE_PRIVATE_KEY exists:", !!process.env.GOOGLE_PRIVATE_KEY);
+    console.log("GOOGLE_PRIVATE_KEY preview:", process.env.GOOGLE_PRIVATE_KEY?.slice(0, 30));
 
     const auth = new google.auth.JWT(
-      serviceEmail,
+      process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       undefined,
-      privateKey,
+      process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       ["https://www.googleapis.com/auth/spreadsheets.readonly"]
     );
 
     const sheets = google.sheets({ version: "v4", auth });
 
-    console.log("✅ Google Sheets API クライアント初期化完了");
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID!;
+    const range = "A2:G";
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "A2:G",
+      range,
     });
-
-    console.log("✅ データ取得成功");
 
     const rows = response.data.values || [];
     return NextResponse.json({ data: rows }, { status: 200 });
 
-  } catch (error: any) {
-    console.error("❌ 認証または取得エラー:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    return NextResponse.json(
-      { error: "読み込みに失敗しました" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("❌ 読み込みエラー:", error);
+    return NextResponse.json({ error: "読み込みに失敗しました" }, { status: 500 });
   }
 }
