@@ -9,10 +9,14 @@ export async function addRowToSheet(data: {
   rating: number;
   image: string;
 }) {
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY_BASE64
+    ? Buffer.from(process.env.GOOGLE_PRIVATE_KEY_BASE64, "base64").toString("utf-8")
+    : undefined;
+
   const auth = new google.auth.JWT(
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     undefined,
-    process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    privateKey,
     ["https://www.googleapis.com/auth/spreadsheets"]
   );
 

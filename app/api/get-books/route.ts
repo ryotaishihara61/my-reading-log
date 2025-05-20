@@ -3,15 +3,27 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // ✅ 環境変数のログ出力（Vercelのログに表示されます）
-    console.log("GOOGLE_SERVICE_ACCOUNT_EMAIL:", process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
-    console.log("GOOGLE_PRIVATE_KEY exists:", !!process.env.GOOGLE_PRIVATE_KEY);
-    console.log("GOOGLE_PRIVATE_KEY preview:", process.env.GOOGLE_PRIVATE_KEY?.slice(0, 30));
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_BASE64;
+
+    // ✅ 環境変数のログ出力（Vercelログで確認）
+    console.log("GOOGLE_SERVICE_ACCOUNT_EMAIL:", serviceAccountEmail);
+    console.log("GOOGLE_PRIVATE_KEY_BASE64 exists:", !!privateKeyBase64);
+    console.log(
+      "GOOGLE_PRIVATE_KEY_BASE64 preview:",
+      privateKeyBase64?.slice(0, 30)
+    );
+
+    if (!serviceAccountEmail || !privateKeyBase64) {
+      throw new Error("Missing required environment variables.");
+    }
+
+    const privateKey = Buffer.from(privateKeyBase64, "base64").toString("utf-8");
 
     const auth = new google.auth.JWT(
-      process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      serviceAccountEmail,
       undefined,
-      process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      privateKey,
       ["https://www.googleapis.com/auth/spreadsheets.readonly"]
     );
 
